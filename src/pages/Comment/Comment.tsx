@@ -4,7 +4,7 @@ export const Comment = () => {
   const { liveId } = useParams();
   return (
     <div>
-      {liveId} Comment
+      コメントぺーじ！
     </div>
   )
 };
