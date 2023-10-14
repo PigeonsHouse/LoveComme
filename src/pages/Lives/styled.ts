@@ -50,10 +50,10 @@ export const LiveImage = css`
   position: relative;
 `;
 
-export const CommentStyle = (x: number, y: number) => {
+export const CommentStyle = (x: number, y: number, index: number) => {
   const length = Math.sqrt((x ** 2) + (y ** 2));
 
-  return css`
+  const style = css`
     position: absolute;
     top: 50%;
     left: 50%;
@@ -62,12 +62,12 @@ export const CommentStyle = (x: number, y: number) => {
     font-size: 30px;
     text-shadow: -1px -1px #000, 1px -1px #000,	-1px 1px #000, 1px 1px #000;
     transform: translateY(-50%) translateX(-50%);
-    animation-name: move;
+    animation-name: move-${index};
     animation-duration: ${100 / length}s;
     animation-iteration-count: 1;
     animation-timing-function: linear;
     animation-fill-mode: forwards;
-    @keyframes move {
+    @keyframes move-${index} {
       from {
         transform: translateX(calc(${-x/length * 600}px - 50%)) translateY(calc(${-y/length * 600}px - 50%));
       }
@@ -76,4 +76,5 @@ export const CommentStyle = (x: number, y: number) => {
       }
     }
   `;
+  return style;
 }

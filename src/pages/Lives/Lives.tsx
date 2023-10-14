@@ -33,8 +33,9 @@ export const Lives = () => {
             <img src="https://s3.ap-northeast-1.wasabisys.com/mastodondb/accounts/avatars/000/000/004/original/95fb339cfb89d75e.jpeg" />
             {
               commentList.map((comment: WSMessage, index) => {
+                const style = CommentStyle(comment.move_x, comment.move_y, index);
                 return (
-                  <div key={index} css={CommentStyle(comment.move_x, comment.move_y)}>
+                  <div key={index} css={style}>
                     {comment.comment}
                   </div>
                 )
