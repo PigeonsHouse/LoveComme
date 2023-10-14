@@ -63,7 +63,7 @@ export const CommentStyle = (x: number, y: number) => {
     text-shadow: -1px -1px #000, 1px -1px #000,	-1px 1px #000, 1px 1px #000;
     transform: translateY(-50%) translateX(-50%);
     animation-name: move;
-    animation-duration: ${150 / length}s;
+    animation-duration: ${100 / length}s;
     animation-iteration-count: 1;
     animation-timing-function: linear;
     animation-fill-mode: forwards;

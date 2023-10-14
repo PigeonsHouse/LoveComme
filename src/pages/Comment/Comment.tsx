@@ -63,8 +63,18 @@ export const Comment = () => {
       });
     }, 1000 / 60);
 
-    // TODO: ここにWebSocket送信部を書く
-  }, [movement, setIsGrabbing]);
+    const client = new WebSocket("wss://love-comme-server.pigeons.house/ws");
+    client.onopen = () => {
+      client.send(JSON.stringify({
+        move_x: movement.x,
+        move_y: movement.y,
+        comment: comment,
+      }))
+      setTimeout(() => {
+        window.location.href = `/lives/${liveId}`
+      }, 1000);
+    }
+  }, [liveId, movement, setIsGrabbing, comment]);
   const MovingComment = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     if (!isGrabbing) return;
     setNewPosition({
