@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BackButton, Background, CommentBox, CommentItem, MovableCommentItem, MoveBackground, ReadyCommentBox } from "./styled";
 import { Link } from "@mui/material";
+import { isBrowser } from "react-device-detect";
 
 type Position = {
   x: number;
@@ -37,15 +38,17 @@ export const Comment = () => {
     setIsReady(false);
   }, [setIsReady]);
 
-  const onGrabComment = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+  const onGrabCommentPC = useCallback(() => {
+    if (!isBrowser) return;
     if (!canMove || isSending) return;
     setIsGrabbing(true);
     setMovement({
-      x: event.movementX,
-      y: event.movementY,
+      x: 0,
+      y: 0,
     });
   }, [canMove, isSending, setIsGrabbing]);
-  const onReleaseComment = useCallback(() => {
+  const onReleaseCommentPC = useCallback(() => {
+    if (!isBrowser) return;
     setIsGrabbing(false);
     if (movement === undefined || Math.sqrt((movement.x ** 2) + (movement.y ** 2)) < 2) return;
     setIsSending(true);
@@ -75,7 +78,8 @@ export const Comment = () => {
       }, 1000);
     }
   }, [liveId, movement, setIsGrabbing, comment]);
-  const MovingComment = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+  const MovingCommentPC = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (!isBrowser) return;
     if (!isGrabbing) return;
     setNewPosition({
       x: event.clientX,
@@ -87,17 +91,73 @@ export const Comment = () => {
     });
   }, [isGrabbing, setNewPosition, setMovement]);
 
+  const onGrabCommentSP = useCallback(() => {
+    if (isBrowser) return;
+    if (!canMove || isSending) return;
+    setIsGrabbing(true);
+    setMovement({
+      x: 0,
+      y: 0,
+    });
+  }, [canMove, isSending, setIsGrabbing]);
+  const onReleaseCommentSP = useCallback(() => {
+    if (isBrowser) return;
+    setIsGrabbing(false);
+    if (movement === undefined || Math.sqrt((movement.x ** 2) + (movement.y ** 2)) < 2) return;
+    setIsSending(true);
+    setInterval(() => {
+      setNewPosition(oldPosition => {
+        if (oldPosition === undefined) return undefined;
+        const newX = oldPosition.x + movement.x;
+        const newY = oldPosition.y + movement.y;
+        if (newX < -1000 || newX > 5000) return oldPosition;
+        if (newY < -1000 || newY > 5000) return oldPosition;
+        return {
+          x: newX,
+          y: newY,
+        }
+      });
+    }, 1000 / 60);
+
+    const client = new WebSocket("wss://love-comme-server.pigeons.house/ws");
+    client.onopen = () => {
+      client.send(JSON.stringify({
+        move_x: movement.x,
+        move_y: movement.y,
+        comment: comment,
+      }))
+      setTimeout(() => {
+        window.location.href = `/lives/${liveId}`
+      }, 1000);
+    }
+  }, [liveId, movement, setIsGrabbing, comment]);
+  const MovingCommentSP = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (isBrowser) return;
+    if (!isGrabbing) return;
+    setNewPosition({
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    });
+    setMovement({
+      x: event.touches[0].clientX - (newPosition ? newPosition.x : 0),
+      y: event.touches[0].clientY - (newPosition ? newPosition.y : 0),
+    })
+  }, [isGrabbing, setNewPosition, setMovement, newPosition]);
+
   return (
     <>
       <div
         css={[Background, isReady ? MoveBackground : null]}
-        onMouseMove={MovingComment}
-        onPointerMove={MovingComment}
+        onMouseMove={MovingCommentPC}
+        onTouchMove={MovingCommentSP}
       >
         <div
           css={commentCss}
-          onMouseDown={onGrabComment}
-          onMouseUp={onReleaseComment}
+          onMouseDown={onGrabCommentPC}
+          onMouseUp={onReleaseCommentPC}
+          onTouchStart={onGrabCommentSP}
+          onTouchEnd={onReleaseCommentSP}
+
           style={newPosition ? {
             left: newPosition.x,
             top: newPosition.y,
