@@ -1,5 +1,8 @@
 # LoveComme!(ラブコメ)
 
+## サーバサイド
+https://github.com/PigeonsHouse/LoveCommeServer
+
 ## テーマ
 
 「コメント」
